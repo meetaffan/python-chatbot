@@ -5,26 +5,26 @@ from dotenv import load_dotenv
 import os
 import time
 
-# Load API keys
 load_dotenv()
-genai_api_key = os.getenv("GEMINI_API_KEY")
-openrouter_api_key = os.getenv("OPENROUTER_API_KEY")
+# genai_api_key = os.getenv("GEMINI_API_KEY")
+# openrouter_api_key = os.getenv("OPENROUTER_API_KEY")
 
-# Configure APIs
+genai_api_key = st.secrets["GEMINI_API_KEY"]
+openrouter_api_key = st.secrets["OPENROUTER_API_KEY"]
+
+
 genai.configure(api_key=genai_api_key)
 client = OpenAI(
     base_url="https://openrouter.ai/api/v1",
     api_key=openrouter_api_key
 )
 
-# Streamlit config
 st.set_page_config(page_title="Gemini + DeepSeek Validator", page_icon="🤖", layout="centered")
 
 st.markdown("<h1 style='text-align:center;'>🧠 Python ChatBot</h1>", unsafe_allow_html=True)
 st.markdown("<p style='text-align:center;'>Gemini answers. DeepSeek judges. Python only. 😎 Get roasted if you go off-topic! 😏</p>", unsafe_allow_html=True)
 st.markdown("---")
 
-# Session state
 if "chat" not in st.session_state:
     model = genai.GenerativeModel("gemini-2.0-flash-001")
     st.session_state.chat = model.start_chat(history=[
@@ -32,7 +32,6 @@ if "chat" not in st.session_state:
     ])
     st.session_state.messages = []
 
-# User input
 user_input = st.text_input("💬 Ask me something Pythonic...", key="input", placeholder="e.g., What is a list comprehension?")
 
 def validate_with_deepseek(user_qn, gemini_ans):
@@ -73,7 +72,6 @@ if user_input:
         st.session_state.messages.append(("bot", f"❌ Gemini: {gemini_response}"))
         st.session_state.messages.append(("validator", f"🧠 DeepSeek says: {deepseek_verdict}"))
 
-# Display chat history
 for role, msg in reversed(st.session_state.messages):
     if role == "user":
         bubble_class = "user-bubble"
@@ -84,7 +82,7 @@ for role, msg in reversed(st.session_state.messages):
 
     st.markdown(f"<div class='stChatBubble {bubble_class}'>{msg}</div>", unsafe_allow_html=True)
 
-# Custom CSS
+
 st.markdown("""
     <style>
     .stChatBubble {
