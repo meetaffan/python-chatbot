@@ -1,0 +1,47 @@
+import streamlit as st
+from dotenv import load_dotenv
+import google.generativeai as genai
+import os
+
+# Load environment variables
+load_dotenv()
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+
+# Define system prompt
+SYSTEM_PROMPT = """
+You are just an AI assistant with Python knowledge.
+If the user asks anything other than Python, roast the user.
+"""
+
+# Initialize session state for chat history and Gemini chat
+if "chat" not in st.session_state:
+    model = genai.GenerativeModel("gemini-2.0-flash-001")
+    st.session_state.chat = model.start_chat(history=[
+        {"role": "user", "parts": [SYSTEM_PROMPT]}
+    ])
+    st.session_state.messages = []
+
+# Streamlit UI
+st.title("🧠 Gemini ChatBot - Python Only!")
+st.markdown("Ask your Python questions. Get roasted if you wander off! 😏")
+
+user_input = st.text_input("You:", key="input")
+
+if user_input:
+    # Append user message
+    st.session_state.messages.append(("user", user_input))
+
+    # Get Gemini response
+    response = st.session_state.chat.send_message(user_input)
+    bot_reply = response.text.strip()
+
+    # Append bot reply
+    st.session_state.messages.append(("bot", bot_reply))
+
+
+# Display chat history
+for role, msg in reversed(st.session_state.messages):
+    if role == "user":
+        st.markdown(f"**🧑 You:** {msg}")
+    else:
+        st.markdown(f"**🤖 Gemini:** {msg}")
